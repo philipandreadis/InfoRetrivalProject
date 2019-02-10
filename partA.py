@@ -1,15 +1,10 @@
 import numpy
-import pandas as pd
-import os
-import matplotlib.pyplot as plt
-import seaborn
-import pylab
 import csv
 import math
 from collections import Counter
 
 
-
+m = 100 # number of pairs to be tested, tweak for faster run
 
 def truncate(number, digits) -> float:
     stepper = pow(10.0, digits)
@@ -108,55 +103,47 @@ def logLoss(model):
         lines[i].append(crossEntropy)
 
 
-lines = []
-
-# Csv file processing
-with open("train_original.csv", encoding="utf8") as f:
-    reader = csv.reader(f, delimiter=",")
-    c = 0
-    for i, line in enumerate(reader):
-        lines.append(line)
-        if i>4000:
-            break
-
-# Lines iteration
-for i in range(1,len(lines)):
-    s1 = lines[i][3]
-    s2 = lines[i][4]
-    #string preprocessing
-    s1 = s1.lower()
-    s2 = s2.lower()
-    s1 = s1.strip('?')
-    s2 = s2.strip('?')
-    # Calculate binary similarity
-    bsim = binaryVector(s1, s2)
-    lines[i].append(bsim)
-    # Calculate weighted similarity
-    wsim = weightedVector(s1, s2)
-    lines[i].append(wsim)
-
-
-
-# Evaluate cross entropy for binary vectors
-logLoss(6)
-# Evaluate cross entropy for weighted vectors
-logLoss(7)
-
-
-for i in range(1,len(lines)):
-    print("id:{} \n question1: {} \n question2: {} \n label:{} | binary vector sim: {} | "
-          "cross-entropy loss(bv): {} | \n \t\t  weighted vector sim: {} | cross-entropy loss(wv): {}\n".format(i-1, lines[i][3], lines[i][4], lines[i][5], lines[i][6], lines[i][8],
+if __name__ == '__main__':
+    lines = []
+    # Csv file processing
+    with open("train_original.csv", encoding="utf8") as f:
+        reader = csv.reader(f, delimiter=",")
+        c = 0
+        for i, line in enumerate(reader):
+            lines.append(line)
+            if i > m:
+                break
+    # Lines iteration
+    for i in range(1,len(lines)):
+        s1 = lines[i][3]
+        s2 = lines[i][4]
+        # string preprocessing
+        s1 = s1.lower()
+        s2 = s2.lower()
+        s1 = s1.strip('?')
+        s2 = s2.strip('?')
+        # Calculate binary similarity
+        bsim = binaryVector(s1, s2)
+        lines[i].append(bsim)
+        # Calculate weighted similarity
+        wsim = weightedVector(s1, s2)
+        lines[i].append(wsim)
+    # Evaluate cross entropy for binary vectors
+    logLoss(6)
+    # Evaluate cross entropy for weighted vectors
+    logLoss(7)
+    for i in range(1,len(lines)):
+        print("id:{} \n question1: {} \n question2: {} \n label:{} | binary vector sim: {} | "
+            "cross-entropy loss(bv): {} | \n \t\t  weighted vector sim: {} | cross-entropy loss(wv): {}\n".format(i-1, lines[i][3], lines[i][4], lines[i][5], lines[i][6], lines[i][8],
                                                  lines[i][7], lines[i][9]))
-
-
-b = 0
-w = 0
-for i in range(1,len(lines)):
-    b = b + lines[i][8]
-    w = w + lines[i][9]
-
-b = b/(len(lines)-1)
-w = w/(len(lines)-1)
-print()
-print("Mean cross entropy loss for binary model: {}".format(b))
-print("Mean cross entropy loss for weighted model: {}".format(w))
+    # Calculate log loss means
+    b = 0
+    w = 0
+    for i in range(1,len(lines)):
+        b = b + lines[i][8]
+        w = w + lines[i][9]
+    b = b/(len(lines)-1)
+    w = w/(len(lines)-1)
+    print()
+    print("Mean cross entropy loss for binary model: {}".format(b))
+    print("Mean cross entropy loss for weighted model: {}".format(w))
